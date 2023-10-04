@@ -41,23 +41,23 @@ This is a basic selenium approach which places the tests, browser and driver on 
 
 The example test used in all models is basic -- Navigate to a home page, verify its content, take a picture.  Here is the source used. You can find it in ./src/test/java/org/jr/selenium in each project:
 
-![Test Source Code](http://192.168.1.105:8080/LocalTest.png)
+![Test Source Code](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/LocalTest.png)
 
 **Approach 2: Remote all-in-one**
 
-![Remote Selenium](http://192.168.1.105:8080/docker.png)
+![Remote Selenium](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker.png)
 
 This approach executes the test separately from the browser interface, driver and browser functions, which are all containerized by Docker.  The example is found in  `02-sel-docker`.  The docker container exposes port 4444, allowing you to review component test status. It also contains VNC, a screen sharing application and exposes port 7900, allowing you to view container browser activity using the VNC-provided console.  While this example runs locally, you could just as easily run the containerized Docker image on its own host, connecting to it remotely from tests running locally.  While this starts us effectivly along the scalability path, it restricts us to scaling grid, driver and browser as one unit only.  Since Selenium Grid easily handles multple browser nodes, it should be scaled at a different rate than the browser nodes. Our following models provide and extend scaling with additional flexibility.
 
 **Approach 3: Remote with Separate Containers**
 
-![Remote Server](http://192.168.1.105:8080/docker-compose.png)
+![Remote Server](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker-compose.png)
 
 In this approach, we implement two docker containers, one for Selenium Grid and another for the Browser/Driver components.  Using this model, we could easily add additional browser containers if needed. We use Docker Compose at the command line to co-ordinate container starting and stopping.   AS stated earlier, Selenium Grid is able to handle multiple browser/drivers simultaneously.  This approach supports multiple browser/driver containers per grid.  With changes to the docker compose code, we can scale the grid and browser components at different rates. A simple demonstration of this approach is found in the `03-sel-docker-cmp` directory.  Start the two containers by executing `./scripts/hubAndNode`, then run your tests with `./scripts/mavenCleanTest`.
 
 **Approach 4: Remote with Scalable Pods**
 
-![Kubernetes Managed](http://192.168.1.105:8080/kube-1.png)
+![Kubernetes Managed](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/kube-1.png)
 
 
 The above approach is technically scaleable because are agble to add Chrome, Firefox or MS Edge browser nodes with code changes.  However, those additions would require us to manually reconfigure docker-compose or issue additional docker-compose commands.  Kubernetes offers us a container options enabling us to orchestrate container scaling.  We can use Kubernetes to help us manage our re-sizing operations as testing demand fluctuates.
@@ -70,7 +70,7 @@ By default, Kubernetes randomly selects pods to discard during scale-in operatio
 
 **Approach 5: Remote with Auto-scaleable Pods (KEDA)**
 
-![Kubernetes Managed](http://192.168.1.105:8080/kubernetes-scaled.png)
+![Kubernetes Managed](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/kubernetes-scaled.png)
 
  With [KEDA](https://keda.sh/ 'Keda home'), or **K**ubernetes-based **E**vent **D**riven **A**utoscaler, kubernetes can drive the scaling of browser containers in Kubernetes (up, or down) based on the number of events in test queues awaiting procesing.
 
