@@ -1,0 +1,9 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR
+
+. ./helpers
+
+header Requesting Selenium Grid status ...
+er curl "$(minikube service selenium-hub-np --url |head -1)/status"

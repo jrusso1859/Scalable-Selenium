@@ -1,0 +1,15 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR >/dev/null 2>&1
+
+. ./helpers
+
+function useUrl () {
+  SEL_KUBE_URL=$(minikube service selenium-hub -n selenium --url |head -1)
+
+  pushd ../
+  er mvn clean test -DSEL_GRID_URL=$SEL_KUBE_URL
+}
+
+useUrl

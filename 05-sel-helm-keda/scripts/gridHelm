@@ -1,0 +1,76 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR
+
+. ./helpers
+
+function waitUntilPodIsUp() {
+  set +eo pipefail
+  header Waiting for pod $1 to enter running state.
+  HUB_COUNT=`kubectl get pod --field-selector=status.phase==Running 2>/dev/null | grep -c $1`
+  while [ $HUB_COUNT -lt 1 ]; do 
+    printf "."
+    sleep 5
+    HUB_COUNT=`kubectl get pod --field-selector=status.phase==Running 2>/dev/null | grep -c $1`
+  done
+  printf "\n"
+  set -eo pipefail
+}
+
+function debugSeleniumSettings () {
+  er helm install --dry-run --debug --values seleniumSettings.yaml selenium-grid docker-selenium/selenium-grid | less
+}
+
+function usage () {
+  echo USAGE: `basename $0` [start\|debug\|stop]
+}
+
+function exposeSeleniumHubNodePortService () {
+  header Exposing selenium hub NodePort ...
+  er kubectl apply -f ../k8s/selenium-hub-np-svc.yaml
+}
+
+function enableKeda () {
+  header Enable Kubernetes Event Driven Autoscaling \(KEDA\) ...
+  set +eo pipefail
+  er kubectl apply --server-side -f ../k8s/keda-2.11.2.yaml
+  set -eo pipefail
+}
+
+function installSeleniumGrid () {
+  header Updating Selnium helm charts ...
+  er helm repo add docker-selenium https://www.selenium.dev/docker-selenium
+  er helm repo update
+  header Installing Selenium helm chart \(see seleniumSettings.yaml\) ...
+  er helm install --values ../helm/selenium-values.yaml selenium-grid docker-selenium/selenium-grid
+  waitUntilPodIsUp selenium-hub
+  enableKeda
+  exposeSeleniumHubNodePortService
+  SEL_HUB_URL=$(minikube service selenium-hub-np --url |head -1)
+  header Selenium Hub service is running at $SEL_HUB_URL
+  er kubectl get all
+}
+
+function removeSeleniumGrid () {
+  header Stopping Selenium Grid ...
+  er helm uninstall selenium-grid
+  er kubectl delete -f ../k8s/selenium-hub-np-svc.yaml
+  er kubectl delete -f ../k8s/keda-2.11.2.yaml
+}
+
+if [ $# -lt 1 ]; then
+  installSeleniumGrid
+else
+ case "$1" in 
+   "start") installSeleniumGrid
+   ;;
+   "debug") debugSeleniumSettings
+   ;;
+   "stop") removeSeleniumGrid
+   ;;
+   *) echo parameter [$1] is not recognized
+     usage
+   ;;
+ esac
+fi

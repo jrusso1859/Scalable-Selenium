@@ -1,0 +1,28 @@
+#!/bin/bash
+
+SCALED_OBJECTS=$(kubectl get ScaledObjects -n selenium 2>/dev/null)
+SCALED_JOBS=$(kubectl get ScaledJobs -n selenium 2>/dev/null)
+
+if [ "$SCALED_OBJECTS" == "" ]; then
+  echo SCALED_OBJECTS is empty.
+else
+  kubectl get ScaledObjects -n selenium -o=json | jq '.metadata.finalizers = null' | kubectl apply -n selenium -f -
+fi
+
+if [ "$SCALED_JOBS" == "" ]; then
+  echo SCALED_JOBS is empty.
+else
+  kubectl get ScaledJobs -n selenium -o=json | jq '.metadata.finalizers = null' | kubectl apply -n selenium -f -
+fi
+
+if [ ! "$SCALED_OBJECTS" == "" ]; then
+  for i in -n  /; do
+    echo kubectl patch $i -p '{"metadata":{"finalizers":null}}' --type=merge
+  done
+fi
+
+if [ ! "$SCALED_JOBS" == "" ]; then
+  for i in -n  /;
+    do echo kubectl patch $i -p '{"metadata":{"finalizers":null}}' --type=merge
+  done
+fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -eo pipefail
+
+echo curl "$(minikube service selenium-hub -n selenium --url |head -1)/status"
+curl "$(minikube service selenium-hub -n selenium --url |head -1)/status"

@@ -1,0 +1,19 @@
+
+basicAuth:
+  enabled: false
+
+chromeNode:
+  enabled: true
+  deploymentEnabled: true
+  replicas: 1
+
+firefoxNode:
+  deploymentEnabled: false
+  enabled: false
+  replicas: 0
+
+edgeNode:
+  deploymentEnabled: false
+  enabled: false
+  replicas: 0
+

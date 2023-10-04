@@ -1,0 +1,40 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR
+
+. ./helpers
+
+function usage () {
+  echo USAGE: `basename $0` [start\|stop]
+}
+
+function startDocker () {
+  header Running Standalone Selenium-standalone in Docker
+  er docker run -d \
+    -p 4444:4444 \
+    -p 7900:7900 \
+    --shm-size="2g" \
+    --rm \
+    --name selenium-test \
+    selenium/standalone-chrome:latest
+}
+
+function stopDocker () {
+  header Stoppoing Selenium-standalone
+  docker stop selenium-test
+}
+
+if [ $# -lt 1 ]; then
+  startDocker
+else
+ case "$1" in 
+   "start") startDocker
+   ;;
+   "stop") stopDocker
+   ;;
+   *) echo parameter [$1] is not recognized
+     usage
+   ;;
+ esac
+fi

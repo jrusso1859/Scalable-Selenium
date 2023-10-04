@@ -1,0 +1,25 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR
+
+. ./helpers
+
+function useIPandPort () {
+  KUBE_IP=$(minikube ip)
+  KUBE_PORT=$(kubectl describe service selenium-hub-np  | grep "NodePort:.*port0.*" |awk  '{ print substr($3, 0,5)}')
+  header Using IP $KUBE_IP, and Port $KUBE_PORT, for testing
+
+  pushd ../
+  er mvn clean test -DSEL_GRID_URL=http://$KUBE_IP:$KUBE_PORT
+}
+
+function useUrl () {
+  SEL_KUBE_URL=$(minikube service selenium-hub-np --url |head -1)
+  header Using URL, $SEL_KUBE_URL, for testing
+
+  pushd ../
+  er mvn clean test -DSEL_GRID_URL=$SEL_KUBE_URL
+}
+
+useUrl

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR
+
+. ./helpers
+
+function startByCommand() {
+  header Starting Seleium hub and node\(s\) using docker ...
+  er docker network create grid
+  er docker run -d -p 4442-4444:4442-4444 --net grid --name selenium-hub selenium/hub:4.12.1-20230912
+  er docker run -d --net grid -e SE_EVENT_BUS_HOST=selenium-hub \
+      --shm-size="2g" \
+      -e SE_EVENT_BUS_PUBLISH_PORT=4442 \
+      -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 \
+      selenium/node-chrome:4.12.1-20230912
+}
+
+function startByDockerCompose() {
+  header Starting Seleium hub and node\(s\) using docker compose...
+  er docker-compose -f docker-compose-v2.yml up -d
+}
+
+function stopByDockerCompose() {
+  header Stopping Seleium hub and node\(s\) using docker compose...
+  er docker-compose -f docker-compose-v2.yml down
+}
+
+if [[ -z $1 ]]; then
+  startByDockerCompose
+elif [[ "$1" == "up" ]]; then
+  startByDockerCompose
+elif [[ "$1" == "down" ]]; then
+  stopByDockerCompose
+else
+  scriptName=`basename $0`
+  echo ERROR: Unknown $scriptName parameter: $1
+  echo Usage: $scriptName [up\|down]
+  exit 1
+fi

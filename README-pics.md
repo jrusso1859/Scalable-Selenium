@@ -9,25 +9,56 @@ This project illustrates five Java-based Selenium implementation approaches.  Th
   4. Kubernetes (K8s) Server & hub -- `04-sel-kubernetes`.
   5. Scalable K8s using Helm -- `05-sel-helm-keda`.
 	
+
+**Component Definitions -- Selenium Webdriver Architecture**
+
+![Web Driver Architecture](https://hackr.io/blog/uploads/images/1570190913rXish5jdLA.jpg 'Web Driver Architecture')
+
+*Credit: Saif Sadiq, hackr.io*
+
+- **WebDriver** -- WebDriver drives a browser natively, as a user would, either locally or from a remote machine. Selenium WebDriver refers to both the language bindings and the implementations of the individual browser controlling code (e.g. ChromeDriver). This is commonly referred to as just WebDriver.
+- **Browser** -- The Browser component provides capabilities and features specific to a given browser.  Browsers supported by WebDriver include Microsoft Edge, Firefox and Chrome.
+- **Remote WebDriver** -- You can use WebDriver remotely the same way you would use it locally. The primary difference is that a remote WebDriver needs to be configured so that it can run your tests on a separate machine.
+- **Grid** -- Selenium Grid allows the execution of WebDriver scripts on remote machines by routing commands sent by the client to remote browser instances.
+
+**Note:** I find it helpful to think of the Selenium test and its supporting logic and systems defined above as separate from the Application under test (AUT).  We can also see that the our illustration makes no mention of the AUT, assuming the "real browser" interacts remotely with it to produce test results.
+
 **Implementations**
 
 The goal implementation and our most robust testing solution is *Approach 5: Remote with auto-scalable Pods (KEDA)*. Jumping straight into that model is a bit overwhelming; it's better to build up to it in smaller steps, gradually increasing the tool set capability and complexity. We will start simply with Java and Selenium, then add, Docker, Docker Compose, Kubernetes, and finally Kubernetes/KEDA.  You can follow along with each approach, each provided separately, so you can see exactly how each approach is extended to provide better capability in exchange for a bit more complexity.  Details of each approach follows.
 
 **Approach 1: Local all-in-one**
 
+![Basic Selenium](https://www.selenium.dev/images/documentation/webdriver/basic_comms.png)
+
+*Credit, all illustrations: www.selenium.dev*
+
 This is a basic selenium approach which places the tests, browser and driver on a local machine without using [Selenium Grid](https://www.selenium.dev/documentation/grid/ 'Selenium Grid Documentation') for remote testing. This approach is perhaps useful for initially defining code to test browser interactions, but it's limited to local-only test execution and requires the host to provide chrome and chrome driver code.  A perhaps "cleaner" variation with better control of the chrome and browser versions in the test execution path could be to build a "Selenium execution" docker container to run the tests.  The extra effort includes constructing the test container with browser, driver, supporting code libraries and test code.  Still, the tests would remain scale-constrained.  A simple demonstration of the hosted approach is found in the `01-sel-local` directory.  Maven provides the required libraries. Your host provides Chrome and Chromedriver.  You may have to download Chrome a and the chromedriver (See ***Note:** below).  Run your tests from this directory with the command, `./scripts/mavenCleanTest`.  
 
 ***Note:** Since the Selenium test logic seeks to match the version of chomedriver on your host's path with the Chrome (browser) version on the path, you my see warnings or errors with recommendations to update Chromedriver and/or Chrome.  If you don't have Chrome or the Chrome webdriver locally available, the [Selenium documentation](https://chromedriver.chromium.org/downloads 'ChromeDriver download') provides information on how to change or upgrade Chrome and ChromeDriver
 
+**Test Source**
+
+The example test used in all models is basic -- Navigate to a home page, verify its content, take a picture.  Here is the source used. You can find it in ./src/test/java/org/jr/selenium in each project:
+
+![Test Source Code](http://192.168.1.105:8080/LocalTest.png)
+
 **Approach 2: Remote all-in-one**
+
+![Remote Selenium](http://192.168.1.105:8080/docker.png)
 
 This approach executes the test separately from the browser interface, driver and browser functions, which are all containerized by Docker.  The example is found in  `02-sel-docker`.  The docker container exposes port 4444, allowing you to review component test status. It also contains VNC, a screen sharing application and exposes port 7900, allowing you to view container browser activity using the VNC-provided console.  While this example runs locally, you could just as easily run the containerized Docker image on its own host, connecting to it remotely from tests running locally.  While this starts us effectivly along the scalability path, it restricts us to scaling grid, driver and browser as one unit only.  Since Selenium Grid easily handles multple browser nodes, it should be scaled at a different rate than the browser nodes. Our following models provide and extend scaling with additional flexibility.
 
 **Approach 3: Remote with Separate Containers**
 
+![Remote Server](http://192.168.1.105:8080/docker-compose.png)
+
 In this approach, we implement two docker containers, one for Selenium Grid and another for the Browser/Driver components.  Using this model, we could easily add additional browser containers if needed. We use Docker Compose at the command line to co-ordinate container starting and stopping.   AS stated earlier, Selenium Grid is able to handle multiple browser/drivers simultaneously.  This approach supports multiple browser/driver containers per grid.  With changes to the docker compose code, we can scale the grid and browser components at different rates. A simple demonstration of this approach is found in the `03-sel-docker-cmp` directory.  Start the two containers by executing `./scripts/hubAndNode`, then run your tests with `./scripts/mavenCleanTest`.
 
 **Approach 4: Remote with Scalable Pods**
+
+![Kubernetes Managed](http://192.168.1.105:8080/kube-1.png)
+
 
 The above approach is technically scaleable because are agble to add Chrome, Firefox or MS Edge browser nodes with code changes.  However, those additions would require us to manually reconfigure docker-compose or issue additional docker-compose commands.  Kubernetes offers us a container options enabling us to orchestrate container scaling.  We can use Kubernetes to help us manage our re-sizing operations as testing demand fluctuates.
 
@@ -39,14 +70,16 @@ By default, Kubernetes randomly selects pods to discard during scale-in operatio
 
 **Approach 5: Remote with Auto-scaleable Pods (KEDA)**
 
-With [KEDA](https://keda.sh/ 'Keda home'), or **K**ubernetes-based **E**vent **D**riven **A**utoscaler, kubernetes can drive the scaling of browser containers in Kubernetes (up, or down) based on the number of events in test queues awaiting procesing.
+![Kubernetes Managed](http://192.168.1.105:8080/kubernetes-scaled.png)
+
+ With [KEDA](https://keda.sh/ 'Keda home'), or **K**ubernetes-based **E**vent **D**riven **A**utoscaler, kubernetes can drive the scaling of browser containers in Kubernetes (up, or down) based on the number of events in test queues awaiting procesing.
 
 Directory `05-sel-helm-keda` illustrates an example of an auto-scalable selenium test model.  We auto-scale the Chrome browser pods based on the number of selenium test requests waiting in the Selenium grid's queue. See the details of the KEDA architecture in [Keda Concepts](https://keda.sh/docs/2.11/concepts/ 'Kubernetes Documentation Site: KEDA Details.')
 
 
 **References**
 
-* [Selenium documentation (Github)](https://github.com/SeleniumHQ/docker-selenium 'Selenium documentation')
+* [Selenium documentation (Github)] (https://github.com/SeleniumHQ/docker-selenium 'Selenium documentation')
 
 * [Selenium 4.0 Components Reference](https://www.selenium.dev/documentation/overview/components/ 'Selnium Components')
 

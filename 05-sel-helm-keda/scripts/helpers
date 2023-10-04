@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function er () {
+  printf "\e[1;32m$*\e[0m\n"
+  $@
+}
+
+function header () {
+  printf "\n>>> "
+  for i in $*; do 
+    printf "%s " $i 
+  done
+  printf " <<<\n\n"
+}
+
+function restartMinikube () {
+  header Restarting Minikube ...
+  er minikube delete
+  er minikube start --driver=docker
+  er minikube dashboard
+}
+
+set -eo pipefail

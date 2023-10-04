@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -eo pipefail
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR >/dev/null 2>&1
+
+# Add docker-selenium helm repository
+helm repo add docker-selenium https://www.selenium.dev/docker-selenium
+
+# Update charts from docker-selenium repo
+helm repo update
+
+# List all versions present in the docker-selenium repo
+helm search repo docker-selenium --versions | head 

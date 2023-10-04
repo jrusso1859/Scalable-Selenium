@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR
+
+. ./helpers
+
+pushd ../
+SEL_GRID_URL=http://127.0.0.1:4444
+header Testing using local grid ...
+er mvn clean test -DSEL_GRID_URL=$SEL_GRID_URL

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+pushd $SCRIPT_DIR >/dev/null 2>&1
+
+. ./helpers
+
+function usage () {
+  echo USAGE: `basename $0` [start\|stop]
+}
+
+function setupIngress() {
+  #Not quite ready ... 
+  er kubectl create -f selenium-hub-ingress.yaml  
+  er kubectl get ingress \| tee -a ./etc/hosts    
+  er kubectl get ingress                          
+}
+
+function waitUntilPodIsUp() {
+  header Waiting for pod $1 to enter running state.
+  set +eo pipefail
+  HUB_COUNT=`kubectl get pod -n selenium --field-selector=status.phase==Running 2>/dev/null | grep $1 | wc -l`
+  while [ $HUB_COUNT -eq 0 ]
+  do 
+    printf "."
+    sleep 5
+    HUB_COUNT=`kubectl get pod -n selenium --field-selector=status.phase==Running 2>/dev/null | grep $1 | wc -l`
+  done
+  printf "\n"
+  set -eo pipefail
+}
+
+function startSelenium() {
+  header Starting Selenium using namespace: selenium
+  er kubectl create namespace selenium
+  er kubectl create --filename ../k8s/selenium-hub-deployment.yaml -n selenium
+  er kubectl create --filename ../k8s/selenium-hub-svc.yaml -n selenium 
+  er kubectl create --filename ../k8s/selenium-node-chrome.yaml -n selenium
+}
+
+function removeSelenium() {
+  header Removing Selenium from namespace: selenium
+  er kubectl delete --filename ../k8s/selenium-node-chrome.yaml -n selenium
+  er kubectl delete --filename ../k8s/selenium-hub-svc.yaml -n selenium 
+  er kubectl delete --filename ../k8s/selenium-hub-deployment.yaml -n selenium
+  er kubectl delete namespace selenium
+}
+
+function forwardPorts() {
+  PODNAME=`kubectl get pods -n selenium --selector="app=selenium-hub" --output=template --template="{{with index .items 0}}{{.metadata.name}}{{end}}"`
+  header Forwarding selenium hub and vnc ports on $PODNAME
+  er kubectl port-forward -n selenium $PODNAME 4444:4444 -n selenium &
+  er kubectl port-forward -n selenium $PODNAME 5900:5900 -n selenium &
+}
+
+function startupSelenium () {
+  restartMinikube
+  startSelenium
+
+  SEL_HUB_URL=$(minikube service selenium-hub -n selenium --url |head -1)
+  waitUntilPodIsUp selenium-hub
+  header Selenium Hub service is running at $SEL_HUB_URL.
+}
+##################################################################################
+##################################################################################
+##################################################################################
+
+if [ $# -lt 1 ]; then
+  startupSelenium
+else
+ case "$1" in 
+   "start") startupSelenium
+   ;;
+   "stop") removeSelenium
+   ;;
+   *) echo parameter [$1] is not recognized
+     usage
+   ;;
+ esac
+fi
