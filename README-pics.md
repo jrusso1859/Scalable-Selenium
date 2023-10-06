@@ -37,7 +37,7 @@ All approaches require java and Maven (links below), and each approach requires 
 
 **Additional Prerequisites:** [Chrome](https://support.google.com/chrome/answer/95346?hl=en&co=GENIE.Platform%3DDesktop), [Webdriver](https://www.selenium.dev/downloads/)
 
-![Basic Selenium](http://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/basic_comms.png)
+![Basic Selenium](https://www.selenium.dev/images/documentation/webdriver/basic_comms.png)
 
 *Credit, all illustrations: www.selenium.dev*
 
@@ -49,13 +49,13 @@ This is a basic selenium approach which places the tests, browser and driver on 
 
 The example test used in all models is basic -- Navigate to a home page, verify its content, take a picture.  Here is the source used. You can find it in `./src/test/java/org/jr/selenium` in each project:
 
-![Test Source Code](http://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/LocalTest.png)
+![Test Source Code](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/LocalTest.png?raw=true)
 
 **Approach 2: Remote all-in-one**
 
 **Additional Prerequisite:** [Docker](https://docs.docker.com/engine/install/)
 
-![Remote Selenium](http://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker.png)
+![Remote Selenium](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker.png?raw=true)
 
 This approach executes the test separately from the browser interface, driver and browser functions, which are all containerized by Docker.  The example is found in  `02-sel-docker`.  The docker container exposes port 4444, allowing you to review component test status. It also contains VNC, a screen sharing application and exposes port 7900, allowing you to view container browser activity using the VNC-provided console.  While this example runs locally, you could just as easily run the containerized Docker image on its own host, connecting to it remotely from tests running locally.  While this starts us effectivly along the scalability path, it restricts us to scaling grid, driver and browser as one unit only.  Since Selenium Grid easily handles multple browser nodes, it should be scaled at a different rate than the browser nodes. Our following models provide and extend scaling with additional flexibility.
 
@@ -63,7 +63,7 @@ This approach executes the test separately from the browser interface, driver an
 
 **Additional Prerequisites:** [Docker](https://docs.docker.com/engine/install/), [Docker-Compose](https://docs.docker.com/compose/install/)
 
-![Remote Server](http://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker-compose.png)
+![Remote Server](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker-compose.png?raw=true)
 
 In this approach, we implement two docker containers, one for Selenium Grid and another for the Browser/Driver components.  Using this model, we could easily add additional browser containers if needed. We use Docker Compose at the command line to co-ordinate container starting and stopping.   AS stated earlier, Selenium Grid is able to handle multiple browser/drivers simultaneously.  This approach supports multiple browser/driver containers per grid.  With changes to the docker compose code, we can scale the grid and browser components at different rates. A simple demonstration of this approach is found in the `03-sel-docker-cmp` directory.  Start the two containers by executing `./scripts/hubAndNode`, then run your tests with `./scripts/mavenCleanTest`.
 
@@ -71,7 +71,7 @@ In this approach, we implement two docker containers, one for Selenium Grid and 
 
 **Additional Prerequisites:** [Docker](https://docs.docker.com/engine/install/), [Minikube](https://minikube.sigs.k8s.io/docs/start/), [Kubernetes](https://kubernetes.io/docs/setup/)
 
-![Kubernetes Managed](http://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/kube-1.png)
+![Kubernetes Managed](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/kube-1.png?raw=true)
 
 The above approach is technically scaleable because we are able to add Chrome, Firefox or MS Edge browser nodes with code changes.  However, those additions would require us to manually reconfigure docker-compose or issue additional docker-compose commands.  Kubernetes offers us container options enabling us to automate (orchestrate) container scaling.  We can use Kubernetes to help us manage our re-sizing operations as testing demand fluctuates.
 
@@ -85,7 +85,7 @@ By default, Kubernetes randomly selects pods to discard during scale-in operatio
 
 **Additional Prerequisites:** [Docker](https://docs.docker.com/engine/install/), [Minikube](https://minikube.sigs.k8s.io/docs/start/), [Kubernetes](https://kubernetes.io/docs/setup/), [Helm](https://helm.sh/docs/intro/install/)
 
-![Kubernetes Managed](http://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/kubernetes-scaled.png)
+![Kubernetes Managed](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/kubernetes-scaled.png?raw=true)
 
 With [KEDA](https://keda.sh/ 'Keda home'), or **K**ubernetes-based **E**vent **D**riven **A**utoscaler, kubernetes can drive the scaling of browser containers in Kubernetes (up, or down) based on the number of events in rhw hub's test queues awaiting processing.
 
