@@ -17,7 +17,9 @@ function restartMinikube () {
   header Restarting Minikube ...
   er minikube delete
   er minikube start --driver=docker
+  set +eo pipefail
   er minikube dashboard
+  set -eo pipefail
 }
 
 set -eo pipefail
