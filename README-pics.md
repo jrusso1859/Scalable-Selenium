@@ -65,7 +65,7 @@ This approach executes the test separately from the browser interface, driver an
 
 ![Remote Server](https://github.com/jrusso1859/Scalable-Selenium/blob/main/Images/docker-compose.png?raw=true)
 
-In this approach, we implement two docker containers, one for Selenium Hub and another for the Browser/Driver components.  Using this model, we could easily add additional browser containers if needed. We use Docker Compose at the command line to co-ordinate container starting and stopping.   AS stated earlier, Selenium Hub is able to handle multiple browser/drivers simultaneously.  This approach supports multiple browser/driver containers per hub.  With changes to the docker compose code, we can scale the hub and browser components at different rates. A simple demonstration of this approach is found in the `03-sel-docker-cmp` directory.  Start the two containers by executing `./scripts/hubAndNode`, then run your tests with `./scripts/mavenCleanTest`.
+In this approach, we implement two docker containers, one for Selenium Hub and another for the Browser/Driver components.  Using this model, we could easily add additional browser containers if needed. We use Docker Compose at the command line to co-ordinate container starting and stopping.   As stated earlier, Selenium Hub is able to handle multiple browser/drivers simultaneously.  This approach supports multiple browser/driver containers per hub.  With changes to the docker compose code, we can scale the hub and browser components at different rates. A simple demonstration of this approach is found in the `03-sel-docker-cmp` directory.  Start the two containers by executing `./scripts/hubAndNode`, then run your tests with `./scripts/mavenCleanTest`.
 
 **Approach 4: Remote with Scalable Pods**
 
