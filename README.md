@@ -1,4 +1,6 @@
 
+# Scaleable Java-based Selenium Testing
+
  This project illustrates five Java-based Selenium implementation approaches.  These are basic test models, emphasizing setup construction over testing logic.  While these models probably do not fit your exact requirements,  they hopefully provide fair bases to build on your own.  This project also illustrates a personal learning path. Working through this simple-to-moderately complex test model progression helped me re-introduce myself to Java-based Selenium testing while gaining background in Docker, Kubernetes and Helm. I hope it helps you as well.
 
  **Testing Models**
@@ -36,7 +38,7 @@ The example test used in all models is basic -- Navigate to a home page, verify 
 
 **Additional Prerequisite:** [Docker](https://docs.docker.com/engine/install/)
 
-This approach executes the test separately from the browser interface, driver and browser functions, which are all containerized by Docker.  The example is found in  `02-sel-docker`.  The docker container exposes port 4444, allowing you to review component test status. It also contains VNC, a screen sharing application and exposes port 7900, allowing you to view container browser activity using the VNC-provided console.  While this example runs locally, you could just as easily run the containerized Docker image on its own host, connecting to it remotely from tests running locally.  While this starts us effectivly along the scalability path, it restricts us to scaling grid, driver and browser as one unit only.  Since Selenium Grid easily handles multple browser nodes, it should be scaled at a different rate than the browser nodes. Our following models provide and extend scaling with additional flexibility.
+This approach executes the test separately from the browser interface, driver and browser functions, which are all containerized by Docker.  The example is found in  `02-sel-docker`.  The docker container exposes port 4444, allowing you to review component test status. It also contains VNC, a screen sharing application and exposes port 7900, allowing you to view container browser activity using the VNC-provided console.  While this example runs locally, you could just as easily run the containerized Docker image on its own host, connecting to it remotely from tests running locally.  While this starts us effectivly along the scalability path, it restricts us to scaling the Hub, Driver and Browser as one unit only.  Since Selenium Hub easily handles multple browser nodes, it should be scaled at a different rate than the browser nodes. Our following models provide and extend scaling with additional flexibility.
 
 **Approach 3: Remote with Separate Containers**
 
